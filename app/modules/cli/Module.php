@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test1\Modules\Cli;
+namespace WebAppSeller\Modules\Cli;
 
 use Phalcon\Di\DiInterface;
 use Phalcon\Loader;
@@ -19,7 +19,7 @@ class Module implements ModuleDefinitionInterface
         $loader = new Loader();
 
         $loader->registerNamespaces([
-            'Test1\Modules\Cli\Tasks' => __DIR__ . '/tasks/',
+            'WebAppSeller\Modules\Cli\Tasks' => __DIR__ . '/tasks/',
         ]);
 
         $loader->register();

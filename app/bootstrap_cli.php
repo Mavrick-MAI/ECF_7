@@ -42,7 +42,7 @@ $console = new ConsoleApp($di);
  * Register console modules
  */
 $console->registerModules([
-    'cli' => ['className' => 'Test1\Modules\Cli\Module']
+    'cli' => ['className' => 'WebAppSeller\Modules\Cli\Module']
 ]);
 
 /**

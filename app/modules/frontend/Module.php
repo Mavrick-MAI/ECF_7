@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test1\Modules\Frontend;
+namespace WebAppSeller\Modules\Frontend;
 
 use Phalcon\Di\DiInterface;
 use Phalcon\Loader;
@@ -21,8 +21,8 @@ class Module implements ModuleDefinitionInterface
         $loader = new Loader();
 
         $loader->registerNamespaces([
-            'Test1\Modules\Frontend\Controllers' => __DIR__ . '/controllers/',
-            'Test1\Modules\Frontend\Models' => __DIR__ . '/models/',
+            'WebAppSeller\Modules\Frontend\Controllers' => __DIR__ . '/controllers/',
+            'WebAppSeller\Modules\Frontend\Models' => __DIR__ . '/models/',
         ]);
 
         $loader->register();

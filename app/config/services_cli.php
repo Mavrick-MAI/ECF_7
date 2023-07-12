@@ -8,6 +8,6 @@ use Phalcon\Cli\Dispatcher;
 */
 $di->setShared('dispatcher', function() {
     $dispatcher = new Dispatcher();
-    $dispatcher->setDefaultNamespace('Test1\Modules\Cli\Tasks');
+    $dispatcher->setDefaultNamespace('WebAppSeller\Modules\Cli\Tasks');
     return $dispatcher;
 });

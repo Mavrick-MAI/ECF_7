@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test1\Modules\Cli\Tasks;
+namespace WebAppSeller\Modules\Cli\Tasks;
 
 class MainTask extends \Phalcon\Cli\Task
 {

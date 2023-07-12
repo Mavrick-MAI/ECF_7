@@ -45,7 +45,7 @@ try {
      * Register application modules
      */
     $application->registerModules([
-        'frontend' => ['className' => 'Test1\Modules\Frontend\Module'],
+        'frontend' => ['className' => 'WebAppSeller\Modules\Frontend\Module'],
     ]);
 
     /**
