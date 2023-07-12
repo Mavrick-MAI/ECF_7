@@ -1,0 +1,13 @@
+#skip php storm workspace
+.idea/*
+#skip phalcon workspace
+.phalcon/*
+#skip cache workspace
+cache/*
+#skip composer repository and build file
+vendor/*
+composer.lock
+#keep directories containing gitkeep files
+!**/.gitkeep
+#ignore any local config file
+**/local.php
