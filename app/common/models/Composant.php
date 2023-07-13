@@ -2,6 +2,9 @@
 
 namespace WebAppSeller\Models;
 
+use Phalcon\Validation;
+use Phalcon\Validation\Validator\InclusionIn;
+
 class Composant extends \Phalcon\Mvc\Model
 {
 
@@ -48,6 +51,10 @@ class Composant extends \Phalcon\Mvc\Model
      * @Column(column="progression", type="integer", nullable=true)
      */
     protected $progression;
+
+    const _TYPE_1_FRONTEND_ = 1;
+    const _TYPE_2_BACKEND_ = 2;
+    const _TYPE_3_DATABASE_ = 3;
 
     /**
      * Method to set the value of field id
@@ -164,7 +171,21 @@ class Composant extends \Phalcon\Mvc\Model
      */
     public function getType()
     {
-        return $this->type;
+        return intval($this->type);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeLibelle(): string
+    {
+        switch ($this->getType())
+        {
+            case self::_TYPE_1_FRONTEND_ : return "FRONTEND";
+            case self::_TYPE_2_BACKEND_ : return "BACKEND";
+            case self::_TYPE_3_DATABASE_ : return "DATABASE";
+            default: return 'Type unknown';
+        }
     }
 
     /**
@@ -219,4 +240,26 @@ class Composant extends \Phalcon\Mvc\Model
         return parent::findFirst($parameters);
     }
 
+    /**
+     * @return bool
+     */
+    public function validation(): bool
+    {
+        $validator = new Validation();
+        $this->add = $validator->add(
+            'type',
+            new InclusionIn(
+                [
+                    'template' => "Le champ :field doit avoir une valeur comprise entre 1 et 3",
+                    'message' => "Le champ :field doit avoir une valeur comprise entre 1 et 3",
+                    'domain' => [
+                        self::_TYPE_1_FRONTEND_,
+                        self::_TYPE_2_BACKEND_,
+                        self::_TYPE_3_DATABASE_,
+                    ],
+                ]
+            )
+        );
+        return $this->validate($validator);
+    }
 }
