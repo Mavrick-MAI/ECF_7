@@ -35,6 +35,10 @@ class Developpeur extends \Phalcon\Mvc\Model
      */
     protected $indice_production;
 
+    const _COMPETENCE_1_FRONTEND_ = 1;
+    const _COMPETENCE_2_BACKEND_ = 2;
+    const _COMPETENCE_3_DATABASE_ = 3;
+
     /**
      * Method to set the value of field id
      *
@@ -115,6 +119,20 @@ class Developpeur extends \Phalcon\Mvc\Model
     public function getCompetence()
     {
         return $this->competence;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCompetenceLibelle(): string
+    {
+        switch ($this->getCompetence())
+        {
+            case self::_COMPETENCE_1_FRONTEND_ : return "Frontend";
+            case self::_COMPETENCE_2_BACKEND_ : return "Backend";
+            case self::_COMPETENCE_3_DATABASE_ : return "Database";
+            default: return 'Compétence inconnue';
+        }
     }
 
     /**
