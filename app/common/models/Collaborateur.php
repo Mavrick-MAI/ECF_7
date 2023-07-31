@@ -42,6 +42,10 @@ class Collaborateur extends \Phalcon\Mvc\Model
      */
     protected $prime_embauche;
 
+    const _NIVEAU_1_STAGIAIRE_ = 1;
+    const _NIVEAU_2_JUNIOR_ = 2;
+    const _NIVEAU_3_SENIOR_ = 3;
+
     /**
      * Method to set the value of field id
      *
@@ -145,6 +149,20 @@ class Collaborateur extends \Phalcon\Mvc\Model
     public function getNiveau()
     {
         return $this->niveau;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNiveauLibelle(): string
+    {
+        switch ($this->getNiveau())
+        {
+            case self::_NIVEAU_1_STAGIAIRE_ : return "Stagiaire";
+            case self::_NIVEAU_2_JUNIOR_ : return "Junior";
+            case self::_NIVEAU_3_SENIOR_ : return "Senior";
+            default: return 'Niveau inconnu';
+        }
     }
 
     /**
