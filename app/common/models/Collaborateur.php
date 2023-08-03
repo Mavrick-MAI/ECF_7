@@ -142,6 +142,14 @@ class Collaborateur extends \Phalcon\Mvc\Model
     }
 
     /**
+     * @return string
+     */
+    public function getPrenomNom(): string
+    {
+        return $this->prenom." ".$this->nom;
+    }
+
+    /**
      * Returns the value of field niveau
      *
      * @return string
