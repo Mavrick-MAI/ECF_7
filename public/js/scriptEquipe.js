@@ -23,7 +23,3 @@ function selectDev(event) {
         }
     }
 }
-
-function deleteEquipe(idEquipe) {
-    console.log(idEquipe);
-}
