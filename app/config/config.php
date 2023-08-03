@@ -6,6 +6,7 @@
 defined('BASE_PATH') || define('BASE_PATH', getenv('BASE_PATH') ?: realpath(dirname(__FILE__) . '/../..'));
 defined('APP_PATH') || define('APP_PATH', BASE_PATH . '/app');
 defined('VIEW_PATH') || define('VIEW_PATH', 'WebAppSeller');
+defined('PUBLIC_PATH') || define('PUBLIC_PATH', VIEW_PATH.'/public');
 
 $localConfiguration = [
     'database' => [
