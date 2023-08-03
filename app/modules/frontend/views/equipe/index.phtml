@@ -4,33 +4,9 @@
     <h1>Equipes</h1>
 </div>
 
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEquipeModal">
-    Créer équipe
-</button>
-
-<div class="modal" tabindex="-1" id="createEquipeModal" aria-labelledby="createEquipeModal" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Création d'une équipe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="<?= $this->url->get(VIEW_PATH."/equipe/createEquipe") ?>">
-                    <?php foreach ($this->view->create as $element) : ?>
-                        <div>
-                            <?php if ($element->getName() != 'Valider') :?>
-                                <label for="<?= $element->getName() ?>"><?= $element->label() ?></label>
-                            <?php endif; ?>
-                            <?= $element->render() ?>
-                        </div>
-                    <?php endforeach; ?>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+<form action="<?= $this->url->get(VIEW_PATH."/equipe/createEditEquipePage") ?>">
+    <input type="submit" class="btn btn-primary" value="Créer équipe" />
+</form>
 
 <div> <?php echo $this->view->equipe ?></div>
 
