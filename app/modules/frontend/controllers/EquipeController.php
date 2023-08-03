@@ -15,7 +15,8 @@ class EquipeController extends ControllerBase
 {
     public function indexAction()
     {
-        $equipeHTML = "";
+        $this->assets->addJs(PUBLIC_PATH.'/js/scriptEquipe.js');
+
         $equipeList = Equipe::find();
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Role'];
 
@@ -84,15 +85,15 @@ class EquipeController extends ControllerBase
             $listDevName[] = [$devId => $devPrenomNom];
         }
 
-        $dev1Input = new Select('dev1', $listDevName);
+        $dev1Input = new Select('dev1', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev1Input->setLabel('Développeur 1');
         $createForm->add($dev1Input);
 
-        $dev2Input = new Select('dev2', $listDevName);
+        $dev2Input = new Select('dev2', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev2Input->setLabel('Développeur 2');
         $createForm->add($dev2Input);
 
-        $dev3Input = new Select('dev3', $listDevName);
+        $dev3Input = new Select('dev3', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev3Input->setLabel('Développeur 3');
         $createForm->add($dev3Input);
 
