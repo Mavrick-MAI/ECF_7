@@ -1,14 +1,6 @@
 <?php $this->assets->outputJs(); ?>
 
-<div class="page-header">
-    <h1>Equipes</h1>
-</div>
-
-<form action="<?= $this->url->get(VIEW_PATH."/equipe/createEditEquipePage") ?>">
-    <input type="submit" class="btn btn-primary" value="Créer équipe" />
-</form>
-
-<div> <?php echo $this->view->equipe ?></div>
+<div> <?php echo $this->view->htmlContent ?></div>
 
 <script>
     deleteButtons = document.getElementsByName('deleteEquipe');

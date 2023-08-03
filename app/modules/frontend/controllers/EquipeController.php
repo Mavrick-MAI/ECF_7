@@ -20,50 +20,56 @@ class EquipeController extends ControllerBase
         $equipeList = Equipe::find();
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Role'];
 
+        $htmlContent = "<div class='page-header'>";
+        $htmlContent .= "<h2>Liste de vos équipes</h2>";
+        $htmlContent .= "</div>";
+
+        $htmlContent .= "<div><a class='btn btn-primary' href='equipe/createEditEquipePage'>Créer une équipe</a></div>";
+
         foreach ($equipeList as $equipe) {
 
-            $equipeHTML .= "<h2 class='mt-4' style='float:left;'>".$equipe->getNom()."</h2>";
-            $equipeHTML .= "<div name='deleteTab'>";
-            $equipeHTML .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can' style='color: #ed0707;'></i></button>";
-            $equipeHTML .= "</div>";
-            $equipeHTML .= "<table class='table'>";
-            $equipeHTML .= "<thead class='table-dark fs-5'>";
-            $equipeHTML .= "<tr>";
+            $htmlContent .= "<h2 class='mt-4' style='float:left;'>".$equipe->getNom()."</h2>";
+            $htmlContent .= "<div name='deleteTab'>";
+            $htmlContent .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can' style='color: #ed0707;'></i></button>";
+            $htmlContent .= "</div>";
+            $htmlContent .= "<table class='table'>";
+            $htmlContent .= "<thead class='table-dark fs-5'>";
+            $htmlContent .= "<tr>";
 
             foreach ($listColumnName as $colName) {
-                $equipeHTML .= "<td>$colName</td>";
+                $htmlContent .= "<td>$colName</td>";
             }
 
-            $equipeHTML .= "</tr>";
-            $equipeHTML .= "</thead>";
-            $equipeHTML .= "<tbody class='table-group-divider'>";
+            $htmlContent .= "</tr>";
+            $htmlContent .= "</thead>";
+            $htmlContent .= "<tbody class='table-group-divider'>";
 
             $chefEquipe = $equipe->ChefDeProjet->Collaborateur;
 
-            $equipeHTML .= "<tr>";
-            $equipeHTML .= "<td>".$chefEquipe->getNom()."</td>";
-            $equipeHTML .= "<td>".$chefEquipe->getPrenom()."</td>";
-            $equipeHTML .= "<td>".$chefEquipe->getNiveauLibelle()."</td>";
-            $equipeHTML .= "<td>Chef d'équipe</td>";
-            $equipeHTML .= "</tr>";
+            $htmlContent .= "<tr>";
+            $htmlContent .= "<td>".$chefEquipe->getNom()."</td>";
+            $htmlContent .= "<td>".$chefEquipe->getPrenom()."</td>";
+            $htmlContent .= "<td>".$chefEquipe->getNiveauLibelle()."</td>";
+            $htmlContent .= "<td>Chef d'équipe</td>";
+            $htmlContent .= "</tr>";
 
             foreach ($equipe->CompositionEquipe as $dev) {
 
                 $devCompetence = $dev->Developpeur->getCompetenceLibelle();
                 $collab = $dev->Developpeur->Collaborateur;
 
-                $equipeHTML .= "<tr>";
-                $equipeHTML .= "<td>".$collab->getNom()."</td>";
-                $equipeHTML .= "<td>".$collab->getPrenom()."</td>";
-                $equipeHTML .= "<td>".$collab->getNiveauLibelle()."</td>";
-                $equipeHTML .= "<td>Développeur ".$devCompetence."</td>";
-                $equipeHTML .= "</tr>";
+                $htmlContent .= "<tr>";
+                $htmlContent .= "<td>".$collab->getNom()."</td>";
+                $htmlContent .= "<td>".$collab->getPrenom()."</td>";
+                $htmlContent .= "<td>".$collab->getNiveauLibelle()."</td>";
+                $htmlContent .= "<td>Développeur ".$devCompetence."</td>";
+                $htmlContent .= "</tr>";
             }
-            $equipeHTML .= "</tbody>";
-            $equipeHTML .= "</table>";
+            $htmlContent .= "</tbody>";
+            $htmlContent .= "</table>";
         }
 
-        $this->view->setVar('equipe', $equipeHTML);
+        $this->view->setVar('htmlContent', $htmlContent);
     }
 
     public function createEditEquipePageAction()
