@@ -8,6 +8,7 @@ use Phalcon\Forms\Element\Submit;
 use Phalcon\Forms\Element\Text;
 use Phalcon\Forms\Form;
 use WebAppSeller\Models\ChefDeProjet;
+use WebAppSeller\Models\CompositionEquipe;
 use WebAppSeller\Models\Developpeur;
 use WebAppSeller\Models\Equipe;
 
@@ -103,10 +104,47 @@ class EquipeController extends ControllerBase
         $this->view->setVar('equipe', $equipeHTML);
         $this->view->setVar('create', $createForm);
     }
-
     public function createEquipeAction()
     {
+        /* Vérifie que la requête est de type POST */
+        if ($this->request->isPost())
+        {
+            $idChefEquipe = $this->request->get('chefDeProjet');
 
+            /* Vérifie qu'un chef de projet a bien été sélectionné */
+            if ($idChefEquipe != 0)
+            {
+                $nomEquipe = $this->request->get('nomEquipe');
+
+                /* Créer la nouvelle équipe */
+                $equipe = (new Equipe())
+                    ->setNom($nomEquipe)
+                    ->setIdChefDeProjet($idChefEquipe);
+
+                /* Si l'équipe est correctement inséré en BDD */
+                if ($equipe->save())
+                {
+                    $idDevs[] = $this->request->get('dev1');
+                    $idDevs[] = $this->request->get('dev2');
+                    $idDevs[] = $this->request->get('dev3');
+
+                    /* Créer les compositions d'équipe */
+                    foreach ($idDevs as $idDev)
+                    {
+                        if ($idDev != 0)
+                        {
+                            $compositionEquipe = (new CompositionEquipe())
+                                ->setIdEquipe($equipe->getId())
+                                ->setIdDeveloppeur($idDev);
+                            $compositionEquipe->save();
+                        }
+                    }
+                }
+            }
+
+        }
+        /* Redirige sur la page des équipes */
+        $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
     }
 
 }
