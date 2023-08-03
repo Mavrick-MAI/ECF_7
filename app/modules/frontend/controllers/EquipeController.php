@@ -10,17 +10,13 @@ class EquipeController extends ControllerBase
 
     public function indexAction()
     {
+        $equipeHTML = "";
         $equipeList = Equipe::find();
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Role'];
 
         foreach ($equipeList as $equipe) {
 
-            $equipeName = $equipe->getNom();
-            $equipeChef = $equipe->getRelated('ChefDeProjet')->getRelated('Collaborateur');
-
-            $compoEquipe = $equipe->getRelated('CompositionEquipe');
-
-            $equipeHTML .= "<h2 class='mt-4'>$equipeName</h2>";
+            $equipeHTML .= "<h2 class='mt-4'>".$equipe->getNom()."</h2>";
 
             $equipeHTML .= "<table class='table'>";
             $equipeHTML .= "<thead class='table-dark fs-5'>";
@@ -34,23 +30,25 @@ class EquipeController extends ControllerBase
             $equipeHTML .= "</thead>";
             $equipeHTML .= "<tbody class='table-group-divider'>";
 
+            $chefEquipe = $equipe->ChefDeProjet->Collaborateur;
+
             $equipeHTML .= "<tr>";
-            $equipeHTML .= "<td>".$equipeChef->getNom()."</td>";
-            $equipeHTML .= "<td>".$equipeChef->getPrenom()."</td>";
-            $equipeHTML .= "<td>".$equipeChef->getNiveauLibelle()."</td>";
+            $equipeHTML .= "<td>".$chefEquipe->getNom()."</td>";
+            $equipeHTML .= "<td>".$chefEquipe->getPrenom()."</td>";
+            $equipeHTML .= "<td>".$chefEquipe->getNiveauLibelle()."</td>";
             $equipeHTML .= "<td>Chef d'équipe</td>";
             $equipeHTML .= "</tr>";
 
-            foreach ($compoEquipe as $dev) {
+            foreach ($equipe->CompositionEquipe as $dev) {
 
-                $collabCompetence = $dev->getRelated('Developpeur')->getCompetenceLibelle();
-                $collab = $dev->getRelated('Developpeur')->getRelated('Collaborateur');
+                $devCompetence = $dev->Developpeur->getCompetenceLibelle();
+                $collab = $dev->Developpeur->Collaborateur;
 
                 $equipeHTML .= "<tr>";
                 $equipeHTML .= "<td>".$collab->getNom()."</td>";
                 $equipeHTML .= "<td>".$collab->getPrenom()."</td>";
                 $equipeHTML .= "<td>".$collab->getNiveauLibelle()."</td>";
-                $equipeHTML .= "<td>Développeur ".$collabCompetence."</td>";
+                $equipeHTML .= "<td>Développeur ".$devCompetence."</td>";
                 $equipeHTML .= "</tr>";
             }
             $equipeHTML .= "</tbody>";
