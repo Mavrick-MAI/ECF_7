@@ -16,7 +16,6 @@ class EquipeController extends ControllerBase
 {
     public function indexAction()
     {
-        $this->assets->addJs(PUBLIC_PATH.'/js/scriptEquipe.js');
 
         $equipeList = Equipe::find();
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Role'];
@@ -64,6 +63,13 @@ class EquipeController extends ControllerBase
             $equipeHTML .= "</table>";
         }
 
+        $this->view->setVar('equipe', $equipeHTML);
+    }
+
+    public function createEditEquipePageAction()
+    {
+        $this->assets->addJs(PUBLIC_PATH.'/js/scriptEquipe.js');
+
         $createForm = new Form();
 
         $nomEquipeInput = new Text('nomEquipe', ['required' => true]);
@@ -103,9 +109,21 @@ class EquipeController extends ControllerBase
         $submit = new Submit('Valider', ['class' => 'btn btn-success']);
         $createForm->add($submit);
 
-        $this->view->setVar('equipe', $equipeHTML);
-        $this->view->setVar('create', $createForm);
+        $html = "<form method='post' action='createEquipe'>";
+        foreach ($createForm as $element) {
+            $html .= "<div>";
+            if ($element->getName() != 'Valider') {
+                $html .= "<label for=''".$element->getName()."' class='me-3'>".$element->label()."</label>";
+            }
+            $html .= $element->render();
+        }
+        $html .= "<a class='btn btn-danger' href='index'>Annuler</a>";
+        $html .= "</div>";
+        $html .= "</form>";
+
+        $this->view->setVar('create', $html);
     }
+
     public function createEquipeAction()
     {
         /* Vérifie que la requête est de type POST */
@@ -151,14 +169,16 @@ class EquipeController extends ControllerBase
 
     public function deleteEquipeAction()
     {
+        /* Récupère l'équipe à supprimer par son ID */
         $equipe = Equipe::findFirst($this->request->get('idEquipe'));
 
+        /* Si l'équipe existe, supprime d'abord les CompositionEquipe liées à l'équipe */
         if (!empty($equipe)) {
             foreach ($equipe->CompositionEquipe as $compositionEquipe) {
                 $compositionEquipe->delete();
             }
         }
-
+        /* Supprime l'équipe */
         $equipe->delete();
 
         /* Redirige sur la page des équipes */
