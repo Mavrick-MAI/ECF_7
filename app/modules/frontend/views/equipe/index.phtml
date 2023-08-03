@@ -33,3 +33,37 @@
 </div>
 
 <div> <?php echo $this->view->equipe ?></div>
+
+<script>
+    deleteButtons = document.getElementsByName('deleteEquipe');
+    Array.from(deleteButtons).forEach((button) => {
+        button.addEventListener("click", function() {
+            let form = document.createElement('form')
+            form.method = "post"
+            form.action = "equipe/deleteEquipe"
+            form.id = "formDeleteEquipe"
+            let hiddenIdInput = document.createElement('input')
+            hiddenIdInput.type = 'hidden'
+            hiddenIdInput.name = "idEquipe"
+            hiddenIdInput.value = button.dataset['id']
+            let confirmInput = document.createElement('input')
+            confirmInput.className = "btn btn-success me-2 mt-4"
+            confirmInput.type = "submit"
+            confirmInput.value = "confirmer"
+            let stopInput = document.createElement('button')
+            stopInput.className = "btn btn-danger mt-4"
+            stopInput.type = "button"
+            stopInput.textContent = "Annuler"
+            stopInput.addEventListener("click", function() {
+                document.getElementById("formDeleteEquipe").remove()
+            })
+
+            form.append(hiddenIdInput)
+            form.append(confirmInput)
+            form.append(stopInput)
+
+            button.parentNode.append(form)
+
+        })
+    })
+</script>

@@ -23,8 +23,10 @@ class EquipeController extends ControllerBase
 
         foreach ($equipeList as $equipe) {
 
-            $equipeHTML .= "<h2 class='mt-4'>".$equipe->getNom()."</h2>";
-
+            $equipeHTML .= "<h2 class='mt-4' style='float:left;'>".$equipe->getNom()."</h2>";
+            $equipeHTML .= "<div name='deleteTab'>";
+            $equipeHTML .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can' style='color: #ed0707;'></i></button>";
+            $equipeHTML .= "</div>";
             $equipeHTML .= "<table class='table'>";
             $equipeHTML .= "<thead class='table-dark fs-5'>";
             $equipeHTML .= "<tr>";
@@ -143,6 +145,22 @@ class EquipeController extends ControllerBase
             }
 
         }
+        /* Redirige sur la page des équipes */
+        $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
+    }
+
+    public function deleteEquipeAction()
+    {
+        $equipe = Equipe::findFirst($this->request->get('idEquipe'));
+
+        if (!empty($equipe)) {
+            foreach ($equipe->CompositionEquipe as $compositionEquipe) {
+                $compositionEquipe->delete();
+            }
+        }
+
+        $equipe->delete();
+
         /* Redirige sur la page des équipes */
         $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
     }
