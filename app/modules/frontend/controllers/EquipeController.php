@@ -109,19 +109,23 @@ class EquipeController extends ControllerBase
         $submit = new Submit('Valider', ['class' => 'btn btn-success']);
         $createForm->add($submit);
 
-        $html = "<form method='post' action='createEquipe'>";
-        foreach ($createForm as $element) {
-            $html .= "<div>";
-            if ($element->getName() != 'Valider') {
-                $html .= "<label for=''".$element->getName()."' class='me-3'>".$element->label()."</label>";
-            }
-            $html .= $element->render();
-        }
-        $html .= "<a class='btn btn-danger' href='index'>Annuler</a>";
-        $html .= "</div>";
-        $html .= "</form>";
+        $htmlContent = "<div class='page-header'>";
+        $htmlContent .= "<h2>Création d'une équipe</h2>";
+        $htmlContent .= "</div>";
 
-        $this->view->setVar('create', $html);
+        $htmlContent .= "<form method='post' action='createEquipe'>";
+        foreach ($createForm as $element) {
+            $htmlContent .= "<div>";
+            if ($element->getName() != 'Valider') {
+                $htmlContent .= "<label for=''".$element->getName()."' class='me-3'>".$element->label()."</label>";
+            }
+            $htmlContent .= $element->render();
+        }
+        $htmlContent .= "<a class='btn btn-danger' href='index'>Annuler</a>";
+        $htmlContent .= "</div>";
+        $htmlContent .= "</form>";
+
+        $this->view->setVar('htmlContent', $htmlContent);
     }
 
     public function createEquipeAction()
