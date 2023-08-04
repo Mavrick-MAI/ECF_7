@@ -29,8 +29,11 @@ class EquipeController extends ControllerBase
         foreach ($equipeList as $equipe) {
 
             $htmlContent .= "<h2 class='mt-4' style='float:left;'>".$equipe->getNom()."</h2>";
+            $htmlContent .= "<div name='buttonTab'>";
+            $htmlContent .= "<a style='float:left;' class='btn mt-4' href='equipe/informationEquipePage?idEquipe=".$equipe->getId()."'><i class='fa-solid fa-eye fa-lg' style='color: #292823;'></i></a>";
             $htmlContent .= "<div name='deleteTab'>";
-            $htmlContent .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can' style='color: #ed0707;'></i></button>";
+            $htmlContent .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can fa-lg' style='color: #ed0707;'></i></button>";
+            $htmlContent .= "</div>";
             $htmlContent .= "</div>";
             $htmlContent .= "<table class='table'>";
             $htmlContent .= "<thead class='table-dark fs-5'>";
@@ -175,6 +178,116 @@ class EquipeController extends ControllerBase
         }
         /* Redirige sur la page des équipes */
         $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
+    }
+    public function informationEquipePageAction()
+    {
+        $equipe = Equipe::findFirst($this->request->get('idEquipe'));
+        $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Boost de production'];
+
+        $htmlContent = "<div class='page-header'>";
+        $htmlContent .= "<h2>Equipe ".$equipe->getNom()."</h2>";
+        $htmlContent .= "</div>";
+
+        $htmlContent .= "<h3 class='mt-3'>Chef de projet</h3>";
+
+        $htmlContent .= "<table class='table'>";
+        $htmlContent .= "<thead class='table-dark fs-5'>";
+        $htmlContent .= "<tr>";
+
+        foreach ($listColumnName as $colName) {
+            $htmlContent .= "<td>$colName</td>";
+        }
+
+        $boostProduction = $equipe->ChefDeProjet->getBoostProduction();
+        $chef = $equipe->ChefDeProjet->Collaborateur;
+
+        $htmlContent .= "</tr>";
+        $htmlContent .= "</thead>";
+        $htmlContent .= "<tbody class='table-group-divider'>";
+
+        $htmlContent .= "<tr>";
+        $htmlContent .= "<td>".$chef->getNom()."</td>";
+        $htmlContent .= "<td>".$chef->getPrenom()."</td>";
+        $htmlContent .= "<td>".$chef->getNiveauLibelle()."</td>";
+        $htmlContent .= "<td>".$boostProduction."%</td>";
+        $htmlContent .= "</tr>";
+        $htmlContent .= "</tbody>";
+        $htmlContent .= "</table>";
+
+        $devFront = [];
+        $devBack = [];
+        $devBDD = [];
+        $indiceProduction = 0;
+
+        $compositionEquipe = $equipe->CompositionEquipe;
+        foreach ($compositionEquipe as $membreEquipe)
+        {
+            $developpeur = $membreEquipe->Developpeur;
+
+            switch ($developpeur->getCompetence()) {
+                case "1":
+                    array_push($devFront, $developpeur);
+                    break;
+                case "2":
+                    array_push($devBack, $developpeur);
+                    break;
+                case "3":
+                    array_push($devBDD, $developpeur);
+                    break;
+            }
+            $indiceProduction += $developpeur->getIndiceProduction();
+        }
+
+        $htmlContent .= $this->createDevTable($devFront, "Front");
+        $htmlContent .= $this->createDevTable($devBack, "Back");
+        $htmlContent .= $this->createDevTable($devBDD, "Database");
+
+        $indiceProduction = $indiceProduction * (1 + $boostProduction/100);
+
+
+
+        $htmlContent .= "<div class='mt-5 fs-3'>Indice de production global : ".$indiceProduction."</div>";
+
+        $this->view->setVar('htmlContent', $htmlContent);
+
+    }
+
+    private function createDevTable($developpeurList, $libelleCompetence) {
+
+        $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Indice de production'];
+
+        $htmlContent = "<h3 class='mt-5'>Developpeurs ".$libelleCompetence."</h3>";
+
+        $htmlContent .= "<table class='table'>";
+        $htmlContent .= "<thead class='table-dark fs-5'>";
+        $htmlContent .= "<tr>";
+        foreach ($listColumnName as $colName) {
+            $htmlContent .= "<td>$colName</td>";
+        }
+        $htmlContent .= "</tr>";
+        $htmlContent .= "</thead>";
+        $htmlContent .= "<tbody class='table-group-divider'>";
+
+        foreach ($developpeurList as $developpeur) {
+
+            $collaborateur = $developpeur->Collaborateur;
+
+            $htmlContent .= "<tr>";
+            $htmlContent .= "<td>".$collaborateur->getNom()."</td>";
+            $htmlContent .= "<td>".$collaborateur->getPrenom()."</td>";
+            $htmlContent .= "<td>".$collaborateur->getNiveauLibelle()."</td>";
+            $htmlContent .= "<td>".$developpeur->getIndiceProduction()."</td>";
+            $htmlContent .= "</tr>";
+        }
+
+        $htmlContent .= "</tbody>";
+        $htmlContent .= "</table>";
+
+        if (empty($developpeurList)) {
+            $htmlContent .= "<p class='ms-5 fs-3'>Aucun développeur ".$libelleCompetence."</p>";
+        }
+
+        return $htmlContent;
     }
 
     public function deleteEquipeAction()
