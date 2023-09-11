@@ -130,7 +130,7 @@ class EquipeController extends ControllerBase
             }
             $htmlContent .= $element->render();
         }
-        $htmlContent .= "<a class='btn btn-danger' href='index'>Annuler</a>";
+        $htmlContent .= "<a class='btn btn-danger' href='../equipe'>Annuler</a>";
         $htmlContent .= "</div>";
         $htmlContent .= "</form>";
 
