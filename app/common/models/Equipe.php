@@ -130,4 +130,23 @@ class Equipe extends \Phalcon\Mvc\Model
         return parent::findFirst($parameters);
     }
 
+    /**
+     * @param $listIdDev
+     * @return bool
+     */
+    public function checkEquipe($listIdDev): bool
+    {
+        $idChefProjet = $this->id_chef_de_projet;
+
+        // récupère les équipes du chef de projet
+        foreach (Equipe::find('id_chef_de_projet = '.$idChefProjet) as $curEquipe) {
+            foreach ($curEquipe->CompositionEquipe as $curCompoEquipe) {
+                if (in_array($curCompoEquipe->getIdDeveloppeur(), $listIdDev)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
