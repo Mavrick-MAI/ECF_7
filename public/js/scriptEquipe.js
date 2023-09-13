@@ -1,8 +1,8 @@
 function selectDev(event) {
     console.log(event.value);
-    dev1Input = document.getElementsByName("dev1")[0];
-    dev2Input = document.getElementsByName("dev2")[0];
-    dev3Input = document.getElementsByName("dev3")[0];
+    let dev1Input = document.getElementsByName("dev1")[0];
+    let dev2Input = document.getElementsByName("dev2")[0];
+    let dev3Input = document.getElementsByName("dev3")[0];
 
     for (let option of dev1Input.options) {
         option.disabled = false
