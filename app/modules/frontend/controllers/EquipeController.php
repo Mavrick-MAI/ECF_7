@@ -154,30 +154,46 @@ class EquipeController extends ControllerBase
                     ->setNom($nomEquipe)
                     ->setIdChefDeProjet($idChefEquipe);
 
-                /* Si l'équipe est correctement inséré en BDD */
-                if ($equipe->save())
-                {
-                    $idDevs[] = $this->request->get('dev1');
-                    $idDevs[] = $this->request->get('dev2');
-                    $idDevs[] = $this->request->get('dev3');
+                $idDevs[] = $this->request->get('dev1');
+                $idDevs[] = $this->request->get('dev2');
+                $idDevs[] = $this->request->get('dev3');
 
-                    /* Créer les compositions d'équipe */
-                    foreach ($idDevs as $idDev)
+                if ($equipe->checkEquipe($idDevs)) {
+                    /* Si l'équipe est correctement inséré en BDD */
+                    if ($equipe->save())
                     {
-                        if ($idDev != 0)
+                        /* Créer les compositions d'équipe */
+                        foreach ($idDevs as $idDev)
                         {
-                            $compositionEquipe = (new CompositionEquipe())
-                                ->setIdEquipe($equipe->getId())
-                                ->setIdDeveloppeur($idDev);
-                            $compositionEquipe->save();
+                            if ($idDev != 0)
+                            {
+                                $compositionEquipe = (new CompositionEquipe())
+                                    ->setIdEquipe($equipe->getId())
+                                    ->setIdDeveloppeur($idDev);
+                                $compositionEquipe->save();
+                            }
                         }
+                        /* Redirige sur la page des équipes */
+                        $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
                     }
+                } else {
+
+                    // renvoi les informations du formulaire
+                    $this->dispatcher->forward([
+                        'action' => 'createEditEquipePage',
+                        'params' => [
+                            'formValues' => [
+                                'nomEquipe' => $nomEquipe,
+                                'chefDeProjet' => $idChefEquipe,
+                                'dev1' => $idDevs[0],
+                                'dev2' => $idDevs[1],
+                                'dev3' => $idDevs[2],
+                            ],
+                        ],
+                    ]);
                 }
             }
-
         }
-        /* Redirige sur la page des équipes */
-        $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
     }
     public function informationEquipePageAction()
     {
