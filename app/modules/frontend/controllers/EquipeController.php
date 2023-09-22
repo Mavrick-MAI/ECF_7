@@ -31,6 +31,7 @@ class EquipeController extends ControllerBase
             $htmlContent .= "<h2 class='mt-4' style='float:left;'>".$equipe->getNom()."</h2>";
             $htmlContent .= "<div name='buttonTab'>";
             $htmlContent .= "<a style='float:left;' class='btn mt-4' href='equipe/informationEquipePage?idEquipe=".$equipe->getId()."'><i class='fa-solid fa-eye fa-lg' style='color: #292823;'></i></a>";
+            $htmlContent .= "<a style='float:left;' class='btn mt-4' href='equipe/createEditEquipePage?idEquipe=".$equipe->getId()."'><i class='fa-regular fa-pen-to-square fa-lg' style='color: #c17d11;'></i></a>";
             $htmlContent .= "<div name='deleteTab'>";
             $htmlContent .= "<button name='deleteEquipe' style='float:left;' data-id='".$equipe->getId()."' type='button' class='btn mt-4'><i class='fa-solid fa-trash-can fa-lg' style='color: #ed0707;'></i></button>";
             $htmlContent .= "</div>";
@@ -118,11 +119,40 @@ class EquipeController extends ControllerBase
         $submit = new Submit('Valider', ['class' => 'btn btn-success']);
         $createForm->add($submit);
 
-        $htmlContent = "<div class='page-header'>";
-        $htmlContent .= "<h2>Création d'une équipe</h2>";
-        $htmlContent .= "</div>";
+        // récupère l'identifiant de l'équipe dans le cas d'une modification
+        $idEquipe = $this->request->get('idEquipe');
+        if ($idEquipe != null) {
+            $equipe = Equipe::findFirst($idEquipe);
+            $nomEquipe = $equipe->getNom();
+            $idChefEquipe = $equipe->getIdChefDeProjet();
 
-        $htmlContent .= "<form method='post' action='createEquipe'>";
+            $nomEquipeInput->setDefault($nomEquipe);
+            $chefDeProjetInput->setDefault($idChefEquipe);
+
+            $developpeurs = CompositionEquipe::find("id_equipe=".$idEquipe);
+            $idDevs = [];
+            foreach ($developpeurs as $developpeur) {
+                $idDevs[] = $developpeur->getIdDeveloppeur();
+            }
+
+            $dev1Input->setDefault($idDevs[0]);
+            $dev2Input->setDefault($idDevs[1]);
+            $dev3Input->setDefault($idDevs[2]);
+
+            $htmlContent = "<div class='page-header'>";
+            $htmlContent .= "<h2>Modification d'une équipe</h2>";
+            $htmlContent .= "</div>";
+
+            $htmlContent .= "<form method='post' action='createEquipe?idEquipe=".$idEquipe."'>";
+        } else {
+
+            $htmlContent = "<div class='page-header'>";
+            $htmlContent .= "<h2>Création d'une équipe</h2>";
+            $htmlContent .= "</div>";
+
+            $htmlContent .= "<form method='post' action='createEquipe'>";
+
+        }
         foreach ($createForm as $element) {
             $htmlContent .= "<div>";
             if ($element->getName() != 'Valider') {
@@ -130,7 +160,7 @@ class EquipeController extends ControllerBase
             }
             $htmlContent .= $element->render();
         }
-        $htmlContent .= "<a class='btn btn-danger' href='../equipe'>Annuler</a>";
+        $htmlContent .= "<a class='btn btn-danger ms-2' href='../equipe'>Annuler</a>";
         $htmlContent .= "</div>";
         $htmlContent .= "</form>";
 
@@ -149,19 +179,28 @@ class EquipeController extends ControllerBase
             {
                 $nomEquipe = $this->request->get('nomEquipe');
 
-                /* Créer la nouvelle équipe */
-                $equipe = (new Equipe())
-                    ->setNom($nomEquipe)
-                    ->setIdChefDeProjet($idChefEquipe);
-
                 $idDevs[] = $this->request->get('dev1');
                 $idDevs[] = $this->request->get('dev2');
                 $idDevs[] = $this->request->get('dev3');
+
+                if ($this->request->get('idEquipe') != null) {
+                    $equipe = Equipe::findFirst($this->request->get('idEquipe'));
+                } else {
+                    /* Créer la nouvelle équipe */
+                    $equipe = new Equipe();
+                }
+
+                    $equipe
+                        ->setNom($nomEquipe)
+                        ->setIdChefDeProjet($idChefEquipe);
 
                 if ($equipe->checkEquipe($idDevs)) {
                     /* Si l'équipe est correctement inséré en BDD */
                     if ($equipe->save())
                     {
+                        foreach ($equipe->CompositionEquipe as $compositionEquipe) {
+                            $compositionEquipe->delete();
+                        }
                         /* Créer les compositions d'équipe */
                         foreach ($idDevs as $idDev)
                         {
@@ -178,6 +217,7 @@ class EquipeController extends ControllerBase
                     }
                 } else {
 
+                    $this->flashSession->error("Au moins un des développeurs sélectionnés est déjà dans une autre équipe avec le même chef de projet.");
                     // renvoi les informations du formulaire
                     $this->dispatcher->forward([
                         'action' => 'createEditEquipePage',

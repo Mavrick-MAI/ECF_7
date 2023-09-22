@@ -1,3 +1,10 @@
 <?php $this->assets->outputJs(); ?>
 
+<?php if ($this->flashSession->has('error')) : ?>
+    <?php $errorMessages = $this->flashSession->getMessages('error'); ?>
+    <?php foreach ($errorMessages as $errorMessage) : ?>
+        <div class='alert alert-danger mt-2'><?php echo $errorMessage ?></div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 <div> <?php echo $this->view->htmlContent ?></div>
