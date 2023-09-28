@@ -1,3 +1,24 @@
 <?php $this->assets->outputJs(); ?>
 
 <div> <?php echo $this->view->htmlContent ?></div>
+
+<script>
+    /*
+     * vérifie qu'au moins un développeur est sélectionné
+     */
+    function checkForm() {
+        var dev1Select = document.getElementById('dev1');
+        var dev2Select = document.getElementById('dev2');
+        var dev3Select = document.getElementById('dev3');
+
+        if (
+            dev1Select.value === '' &&
+            dev2Select.value === '' &&
+            dev3Select.value === ''
+        ) {
+            alert('Veuillez sélectionner au moins un développeur.');
+            return false;
+        }
+        return true;
+    }
+</script>
