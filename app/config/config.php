@@ -52,3 +52,8 @@ return new \Phalcon\Config([
      */
     'printNewLine' => true
 ]);
+
+// créer un filtre pour "néttoyer" les informations des formulaires
+$di->setShared('filter', function () {
+    return new \Phalcon\Filter();
+});
