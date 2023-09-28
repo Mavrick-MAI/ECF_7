@@ -133,14 +133,13 @@ class EquipeController extends ControllerBase
         // créer la liste déroulante des chefs de projet avec la liste créée au préalable
         $chefDeProjetInput = new Select('chefDeProjet', $listChefName);
         $chefDeProjetInput->setLabel('Chef de projet');
-        $chefDeProjetInput->setAttribute('id', 'chefDeProjet');
         $chefDeProjetInput->setAttribute('required', true);
 
         $createForm->add($chefDeProjetInput);
 
         // créer la liste des développeurs
         $listDevName = ['' => "Choisir un développeur"];
-        foreach (Developpeur::find() as $dev) {
+        foreach (Developpeur::find(["order" => "competence"]) as $dev) {
             // récupère l'id
             $devId = $dev->getId();
             // récupère le prénom et le nom
