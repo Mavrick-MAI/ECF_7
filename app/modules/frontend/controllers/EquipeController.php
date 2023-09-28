@@ -7,6 +7,7 @@ use Phalcon\Forms\Element\Select;
 use Phalcon\Forms\Element\Submit;
 use Phalcon\Forms\Element\Text;
 use Phalcon\Forms\Form;
+use Phalcon\Validation\Validator\Uniqueness;
 use WebAppSeller\Models\ChefDeProjet;
 use WebAppSeller\Models\CompositionEquipe;
 use WebAppSeller\Models\Developpeur;
@@ -111,12 +112,12 @@ class EquipeController extends ControllerBase
         $this->assets->addJs(PUBLIC_PATH.'/js/scriptEquipe.js');
 
         // créer le formulaire de création/modification d'équipe
-        $createForm = new Form();
+        $createEditForm = new Form();
 
         // créer le champ pour le nom de l'équipe, le champ ne peut pas être vide à l'envoi
         $nomEquipeInput = new Text('nomEquipe', ['required' => true]);
         $nomEquipeInput->setLabel('Nom équipe');
-        $createForm->add($nomEquipeInput);
+        $createEditForm->add($nomEquipeInput);
 
         // créer la liste des chef de projet
         $listChefName = ['' => "Choisir un chef de projet",];
@@ -135,7 +136,7 @@ class EquipeController extends ControllerBase
         $chefDeProjetInput->setLabel('Chef de projet');
         $chefDeProjetInput->setAttribute('required', true);
 
-        $createForm->add($chefDeProjetInput);
+        $createEditForm->add($chefDeProjetInput);
 
         // créer la liste des développeurs
         $listDevName = ['' => "Choisir un développeur"];
@@ -153,21 +154,21 @@ class EquipeController extends ControllerBase
         // créer la liste déroulante pour le développeur 1 avec la liste créée au préalable
         $dev1Input = new Select('dev1', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev1Input->setLabel('Développeur 1');
-        $createForm->add($dev1Input);
+        $createEditForm->add($dev1Input);
 
         // créer la liste déroulante pour le développeur 2 avec la liste créée au préalable
         $dev2Input = new Select('dev2', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev2Input->setLabel('Développeur 2');
-        $createForm->add($dev2Input);
+        $createEditForm->add($dev2Input);
 
         // créer la liste déroulante pour le développeur 3 avec la liste créée au préalable
         $dev3Input = new Select('dev3', $listDevName, ['onchange' => 'selectDev(this)']);
         $dev3Input->setLabel('Développeur 3');
-        $createForm->add($dev3Input);
+        $createEditForm->add($dev3Input);
 
         // créer le bouton d'envoi du formulaire
         $submit = new Submit('Valider', ['class' => 'btn btn-success']);
-        $createForm->add($submit);
+        $createEditForm->add($submit);
 
         // récupère l'identifiant de l'équipe dans le cas d'une modification
         $idEquipe = $this->request->get('idEquipe');
@@ -217,7 +218,7 @@ class EquipeController extends ControllerBase
 
         }
         // boucle sur les éléments du formulaire afin de les rendre visible sur la page
-        foreach ($createForm as $element) {
+        foreach ($createEditForm as $element) {
             $htmlContent .= "<div>";
             // vérifie qu'il ne s'agit pas du bouton 'Valider'
             if ($element->getName() != 'Valider') {
@@ -255,54 +256,81 @@ class EquipeController extends ControllerBase
                 // récupère le nom de l'équipe du formulaire
                 $nomEquipe = $this->request->get('nomEquipe');
 
-                // récupère les identifiants des développeurs du formulaire
-                $idDevs[] = $this->request->get('dev1');
-                $idDevs[] = $this->request->get('dev2');
-                $idDevs[] = $this->request->get('dev3');
+                // récupère le filtre
+                $filter = $this->getDI()->getShared('filter');
 
-                // vérifie si il s'agit d'une création ou d'une modification
-                if (!empty($this->request->get('idEquipe'))) {
-                    // si l'identifiant équipe existe dans la requête, il s'agit d'une modification
-                    // récupère l'équipe dans la base de données
-                    $equipe = Equipe::findFirst($this->request->get('idEquipe'));
-                } else {
-                    // si l'identifiant équipe n'existe pas dans la requête, il s'agit d'une création
-                    // Créer la nouvelle équipe
-                    $equipe = new Equipe();
-                }
+                // nettoie le nom de l'équipe (enlève les balises HTML, ...)
+                $cleanNomEquipe = $filter->sanitize($nomEquipe, 'string');
+
+                $existNomEquipe = Equipe::findFirst([
+                    'conditions' => 'nom = :nomEquipe:',
+                    'bind' => ['nomEquipe' => $cleanNomEquipe],
+                ]);
+
+                // récupère l'identifiant de l'équipe
+                $idEquipe = $this->request->get('idEquipe');
+
+                if (empty($existNomEquipe) || (!empty($idEquipe) && $existNomEquipe->getId() === $idEquipe))
+                {
+                    // récupère les identifiants des développeurs du formulaire
+                    $idDevs[] = $this->request->get('dev1');
+                    $idDevs[] = $this->request->get('dev2');
+                    $idDevs[] = $this->request->get('dev3');
+                    // vérifie si l'identifiant d'équipe existe
+                    if (!empty($idEquipe)) {
+                        // si l'identifiant équipe existe dans la requête, il s'agit d'une modification
+                        // nettoie le nom de l'équipe
+                        $cleanIdEquipe = $filter->sanitize($idEquipe, 'string');
+                        // récupère l'équipe dans la base de données
+                        $equipe = Equipe::findFirst($cleanIdEquipe);
+                    } else {
+                        // si l'identifiant équipe n'existe pas dans la requête, il s'agit d'une création
+                        // Créer la nouvelle équipe
+                        $equipe = new Equipe();
+                    }
+
+                    // nettoie l'identifiant du chef de l'équipe
+                    $cleanIdChefEquipe = $filter->sanitize($idChefEquipe, 'string');
                     // affecte les nouvelles informations de l'équipe
                     $equipe
-                        ->setNom($nomEquipe)
-                        ->setIdChefDeProjet($idChefEquipe);
-                // vérifie que l'équipe est valide
-                if ($equipe->checkEquipe($idDevs)) {
-                    // insère/modifie l'équipe en BDD
-                    if ($equipe->save())
-                    {
-                        // supprime les associations de développeur à l'équipe en BDD
-                        foreach ($equipe->CompositionEquipe as $compositionEquipe) {
-                            $compositionEquipe->delete();
-                        }
-                        // boucle sur les identifiants de développeurs reçus du formulaire
-                        foreach ($idDevs as $idDev)
+                        ->setNom($cleanNomEquipe)
+                        ->setIdChefDeProjet($cleanIdChefEquipe);
+                    // vérifie que l'équipe est valide
+                    if ($equipe->checkEquipe($idDevs)) {
+                        // insère/modifie l'équipe en BDD
+                        if ($equipe->save())
                         {
-                            // vérifie qu'il s'agit bien d'un identifiant (un id ne peut être inférieur ou égal à 0)
-                            if ($idDev > 0)
-                            {
-                                // créer la nouvelle association de développeur à l'équipe
-                                $compositionEquipe = (new CompositionEquipe())
-                                    ->setIdEquipe($equipe->getId())
-                                    ->setIdDeveloppeur($idDev);
-                                // insère les nouvelles associations de développeur à l'équipe en BDD
-                                $compositionEquipe->save();
+                            // supprime les associations de développeur à l'équipe en BDD
+                            foreach ($equipe->CompositionEquipe as $compositionEquipe) {
+                                $compositionEquipe->delete();
                             }
+                            // boucle sur les identifiants de développeurs reçus du formulaire
+                            foreach ($idDevs as $idDev)
+                            {
+                                // vérifie qu'il s'agit bien d'un identifiant (un id ne peut être inférieur ou égal à 0)
+                                if ($idDev > 0)
+                                {
+                                    // nettoie l'identifiant de développeur courant
+                                    $cleanIdDev = $filter->sanitize($idDev, 'string');
+                                    // créer la nouvelle association de développeur à l'équipe
+                                    $compositionEquipe = (new CompositionEquipe())
+                                        ->setIdEquipe($equipe->getId())
+                                        ->setIdDeveloppeur($cleanIdDev);
+                                    // insère les nouvelles associations de développeur à l'équipe en BDD
+                                    $compositionEquipe->save();
+                                }
+                            }
+                            // redirige sur la page des équipes
+                            $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
                         }
-                        // redirige sur la page des équipes
-                        $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
+
+                    } else {
+                        // message d'erreur si un des developpeur est déjà affecté à une équipe existante avec le meme chef de projet
+                        $errorMessage = "Au moins un des développeurs sélectionnés est déjà dans une autre équipe avec le même chef de projet.";
                     }
                 } else {
-                    // message d'erreur si un des developpeur est déjà affecté à une équipe existante avec le meme chef de projet
-                    $errorMessage = "Au moins un des développeurs sélectionnés est déjà dans une autre équipe avec le même chef de projet.";
+                    // message d'erreur si le nom d'équipe est déjà utilisé
+                    $errorMessage = "Le nom d'équipe '".$existNomEquipe->getNom()."' est déjà pris.";
                 }
             } else {
                 // message d'erreur si aucun chef de projet a été sélectionné
