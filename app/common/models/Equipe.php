@@ -138,12 +138,17 @@ class Equipe extends \Phalcon\Mvc\Model
     {
         $idChefProjet = $this->id_chef_de_projet;
 
+        $conditions = 'id_chef_de_projet = :idChefProjet:';
+        $bind = ['idChefProjet' => $idChefProjet];
+
+        if ($this->id !== null) {
+            $conditions .= ' AND id <> :idEquipeToExclude:';
+            $bind['idEquipeToExclude'] = $this->id;
+        }
+
         $equipes = Equipe::find([
-            'conditions' => 'id_chef_de_projet = :idChefProjet:' . ($this->id !== null ? ' AND id <> :idEquipeToExclude:' : ''),
-            'bind' => [
-                'idChefProjet' => $idChefProjet,
-                'idEquipeToExclude' => $this->id,
-            ],
+            'conditions' => $conditions,
+            'bind' => $bind,
         ]);
         // récupère les équipes du chef de projet
         foreach ($equipes as $curEquipe) {
