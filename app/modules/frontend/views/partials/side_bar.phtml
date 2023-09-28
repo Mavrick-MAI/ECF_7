@@ -30,6 +30,13 @@
             </div>
         </div>
         <div class="container">
+            <?php if ($this->flashSession->has('error')) : ?>
+                <?php $errorMessages = $this->flashSession->getMessages('error'); ?>
+                <?php foreach ($errorMessages as $errorMessage) : ?>
+                    <div class='alert alert-danger mt-2'><?php echo $errorMessage ?></div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
             <?php echo $this->getContent(); ?>
         </div>
     </div>
