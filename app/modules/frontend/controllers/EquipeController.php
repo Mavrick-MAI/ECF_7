@@ -236,6 +236,7 @@ class EquipeController extends ControllerBase
         // envoie la variable contenant le HTML à la vue
         $this->view->setVar('htmlContent', $htmlContent);
     }
+
     /**
      * Action qui permet de créer ou de modifier une équipe en BDD
      * Dans le cas d'une modification, un identifiant d'équipe est envoyé
@@ -357,32 +358,43 @@ class EquipeController extends ControllerBase
             ]);
         }
     }
+
+    /**
+     * Action qui génére le HTML pour la page permettant de consulter une équipe
+     */
     public function informationEquipePageAction()
     {
+        // récupère l'équipe sélectionnée par son identifiant
         $equipe = Equipe::findFirst($this->request->get('idEquipe'));
+
+        // liste des colonnes pour la table du chef d'équipe
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Boost de production'];
 
-        $htmlContent = "<div class='page-header'>";
-        $htmlContent .= "<h2>Equipe ".$equipe->getNom()."</h2>";
-        $htmlContent .= "</div>";
+        // le titre de la page
+        $htmlContent = "<h1>Equipe ".$equipe->getNom()."</h1>";
 
-        $htmlContent .= "<h3 class='mt-3'>Chef de projet</h3>";
+        // le titre de la table du chef d'équipe
+        $htmlContent .= "<h2 class='mt-3'>Chef de projet</h2>";
 
+        // créé la table du chef d'équipe
         $htmlContent .= "<table class='table'>";
         $htmlContent .= "<thead class='table-dark fs-5'>";
+        // créé la ligne d'entête de colonne
         $htmlContent .= "<tr>";
-
         foreach ($listColumnName as $colName) {
             $htmlContent .= "<td>$colName</td>";
         }
-
+        // récupère le boost de production du chef d'équipe
         $boostProduction = $equipe->ChefDeProjet->getBoostProduction();
+        // récupère les informations du chef dans la table Collaborateur
         $chef = $equipe->ChefDeProjet->Collaborateur;
 
         $htmlContent .= "</tr>";
         $htmlContent .= "</thead>";
+        // créé le corps de la table
         $htmlContent .= "<tbody class='table-group-divider'>";
 
+        // créé la ligne du chef d'équipe avec ses informations
         $htmlContent .= "<tr>";
         $htmlContent .= "<td>".$chef->getNom()."</td>";
         $htmlContent .= "<td>".$chef->getPrenom()."</td>";
@@ -392,16 +404,20 @@ class EquipeController extends ControllerBase
         $htmlContent .= "</tbody>";
         $htmlContent .= "</table>";
 
+        // initialise les listes pour les développeurs front, back et database
         $devFront = [];
         $devBack = [];
         $devBDD = [];
+        // initialise l'indice de production global de l'équipe
         $indiceProduction = 0;
 
-        $compositionEquipe = $equipe->CompositionEquipe;
-        foreach ($compositionEquipe as $membreEquipe)
+        // boucle sur la liste des compositions de l'équipe
+        foreach ($equipe->CompositionEquipe as $membreEquipe)
         {
+            // récupère les informations du développeur courant
             $developpeur = $membreEquipe->Developpeur;
 
+            // insère le développeur dans la liste qui correspond à sa compétence
             switch ($developpeur->getCompetence()) {
                 case "1":
                     array_push($devFront, $developpeur);
@@ -413,43 +429,56 @@ class EquipeController extends ControllerBase
                     array_push($devBDD, $developpeur);
                     break;
             }
+            // ajoute son indice de production à l'indice global de l'équipe
             $indiceProduction += $developpeur->getIndiceProduction();
         }
 
+        // appel aux fonctions de création des tables des différents types de développeur
         $htmlContent .= $this->createDevTable($devFront, "Front");
         $htmlContent .= $this->createDevTable($devBack, "Back");
         $htmlContent .= $this->createDevTable($devBDD, "Database");
 
+        // applique le boost du chef d'équipe à l'indice de production global
         $indiceProduction = $indiceProduction * (1 + $boostProduction/100);
 
-
-
+        // créé l'indice de production dans le HTML
         $htmlContent .= "<div class='mt-5 fs-3'>Indice de production global : ".$indiceProduction."</div>";
 
+        // affecte le HTML à la vue
         $this->view->setVar('htmlContent', $htmlContent);
 
     }
 
+    /**
+     * Action qui génére le HTML d'une table pour une liste de développeurs avec un type de compétence donné
+     */
     private function createDevTable($developpeurList, $libelleCompetence) {
 
+        // la liste des noms des colonnes pour la table
         $listColumnName = ['Nom', 'Prénom', 'Niveau', 'Indice de production'];
 
-        $htmlContent = "<h3 class='mt-5'>Developpeurs ".$libelleCompetence."</h3>";
+        // créé le titre de la table
+        $htmlContent = "<h2 class='mt-5'>Developpeurs ".$libelleCompetence."</h2>";
 
+        // créé la table
         $htmlContent .= "<table class='table'>";
         $htmlContent .= "<thead class='table-dark fs-5'>";
+        // créé la ligne des entêtes de colonnes
         $htmlContent .= "<tr>";
         foreach ($listColumnName as $colName) {
             $htmlContent .= "<td>$colName</td>";
         }
         $htmlContent .= "</tr>";
         $htmlContent .= "</thead>";
+        // créé le corps de la table
         $htmlContent .= "<tbody class='table-group-divider'>";
-
+        // boucle sur la liste de développeurs
         foreach ($developpeurList as $developpeur) {
 
+            // récupère les informations dans la table Collaborateur du développeur courant
             $collaborateur = $developpeur->Collaborateur;
 
+            // créé la ligne de la table du développeur courant
             $htmlContent .= "<tr>";
             $htmlContent .= "<td>".$collaborateur->getNom()."</td>";
             $htmlContent .= "<td>".$collaborateur->getPrenom()."</td>";
@@ -461,29 +490,39 @@ class EquipeController extends ControllerBase
         $htmlContent .= "</tbody>";
         $htmlContent .= "</table>";
 
+        // affiche un message si la liste est vide
         if (empty($developpeurList)) {
-            $htmlContent .= "<p class='ms-5 fs-3'>Aucun développeur ".$libelleCompetence."</p>";
+            $htmlContent .= "<p class='ms-5 fs-5'>Aucun développeur ".$libelleCompetence."</p>";
         }
 
+        // retourne la chaine de caractère contenant le HTML
         return $htmlContent;
     }
 
+    /**
+     * Action qui supprime une équipe en BDD
+     */
     public function deleteEquipeAction()
     {
-        /* Récupère l'équipe à supprimer par son ID */
+        // récupère l'équipe à supprimer par son ID
         $equipe = Equipe::findFirst($this->request->get('idEquipe'));
 
-        /* Si l'équipe existe, supprime d'abord les CompositionEquipe liées à l'équipe */
+        // si l'équipe existe, supprime d'abord les CompositionEquipe liées à l'équipe
         if (!empty($equipe)) {
+            // boucle sur les compositions équipes de l'équipe
             foreach ($equipe->CompositionEquipe as $compositionEquipe) {
                 $compositionEquipe->delete();
             }
-        }
-        /* Supprime l'équipe */
-        $equipe->delete();
+            // Supprime l'équipe
+            $equipe->delete();
 
-        /* Redirige sur la page des équipes */
+        } else {
+            // envoie le message d'erreur à la vue
+            $this->flashSession->error("L'équipe que vous tentez de supprimer n'existe pas.");
+        }
+        // Redirige sur la page des équipes
         $this->response->redirect($this->url->get(VIEW_PATH."/equipe"));
+
     }
 
 }
